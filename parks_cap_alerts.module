@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Implements hook_requirements().
+ */
+function parks_cap_alerts_requirements($phase)
+{
+    $requirements = [];
+    if ($phase == 'install') {
+        // Check for required modules.
+        $required = ['cap_alerts'];
+        foreach ($required as $module) {
+            if (!\Drupal::moduleHandler()->moduleExists($module)) {
+                $requirements['parks_cap_alerts_dependencies'] = [
+                    'title' => t('Parks CAP Alerts dependencies'),
+                    'value' => t('Missing required module: @module', ['@module' => $module]),
+                    'severity' => REQUIREMENT_ERROR,
+                ];
+            }
+        }
+    }
+    return $requirements;
+}

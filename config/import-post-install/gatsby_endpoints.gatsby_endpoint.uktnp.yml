@@ -1,0 +1,125 @@
+langcode: en
+status: true
+dependencies: {  }
+id: uktnp
+label: 'Uluṟu-Kata Tjuṯa National Park'
+weight: '0'
+provider: null
+plugin: jsonapi
+settings:
+  id: jsonapi
+  label: null
+  provider: gatsby_endpoints
+  secret_key: ''
+build_entity_types:
+  0:
+    entity_type: node
+    entity_bundles:
+      event: event
+      location: location
+      news_article: news_article
+      page: page
+      people: people
+      place: place
+      project: project
+      publication: publication
+      region: region
+      tour: tour
+      wildlife: wildlife
+      anbg_hub_resource_url: 0
+      anbg_lh_experience: 0
+      anbg_lh_homepage: 0
+      anbg_lh_resource_file: 0
+      anbg_lh_topic: 0
+      app_page: 0
+      cinp_location: 0
+      hub_resource_video: 0
+      kar_content: 0
+      kar_location: 0
+      park: 0
+    build_published: 1
+    include_entities:
+      block_content: block_content
+      content_moderation_state: content_moderation_state
+      file: file
+      media: media
+      menu_link_content: menu_link_content
+      node: node
+      path_alias: path_alias
+      redirect: redirect
+      taxonomy_term: taxonomy_term
+      paragraph: paragraph
+      linkcheckerlink: 0
+      user: 0
+  1:
+    entity_type: block_content
+    entity_bundles:
+      access_report_text: access_report_text
+      cross_site_top_banner_message: cross_site_top_banner_message
+      footer_logos_panel: footer_logos_panel
+      footer_nav_list: footer_nav_list
+      mailchimp_opt_in_form: mailchimp_opt_in_form
+      message_some_pages: message_some_pages
+      shared_footer_parks_logo_panel: shared_footer_parks_logo_panel
+      site_logo_panel: site_logo_panel
+      site_wide_message: site_wide_message
+      social_media: social_media
+      tile_images_some_pages: tile_images_some_pages
+      content_block: 0
+    include_entities:
+      file: file
+      media: media
+      paragraph: paragraph
+      block_content: 0
+      content_moderation_state: 0
+      linkcheckerlink: 0
+      menu_link_content: 0
+      node: 0
+      path_alias: 0
+      redirect: 0
+      taxonomy_term: 0
+      user: 0
+  2:
+    entity_type: media
+    entity_bundles:
+      audio_file: audio_file
+      button_background_image: button_background_image
+      document: document
+      hero_image: hero_image
+      image_gallery: image_gallery
+      inline_image: inline_image
+      menu_image: menu_image
+      profile_image: profile_image
+      svg_icon: svg_icon
+      tile_image: tile_image
+      anbg_lh_badge: 0
+      anbg_lh_file: 0
+      anbg_lh_inline_img: 0
+      anbg_lh_thumb: 0
+      app_image: 0
+      migration_content: 0
+      video: 0
+    include_entities:
+      file: file
+      block_content: 0
+      content_moderation_state: 0
+      linkcheckerlink: 0
+      media: 0
+      menu_link_content: 0
+      node: 0
+      path_alias: 0
+      redirect: 0
+      taxonomy_term: 0
+      user: 0
+      paragraph: 0
+  actions: {  }
+included_entity_types: null
+preview_urls:
+  preview_url: {  }
+  actions: {  }
+build_urls:
+  build_url:
+    - 'https://webhooks.amplify.ap-southeast-2.amazonaws.com/prod/webhooks?id=806909a8-cf3f-4e80-9c12-486d042f5ecb&token=9xk27he7rVjIoWLAGUhw5b9gYYtroWqD4vfoc3o'
+    - 'https://webhooks.amplify.ap-southeast-2.amazonaws.com/prod/webhooks?id=f7a0c866-a371-49e6-a9a1-4818659ed5d1&token=SzaBP4qMNcvWH7Hn3hudTPniA4lH5SLxBYISsKnUnU'
+  actions: {  }
+build_trigger: incremental

@@ -1,0 +1,3 @@
+services:
+  Drupal\cap_alerts\Service\CapAlertsHelper:
+    alias: 'cap_alerts.cap_alerts_helper'

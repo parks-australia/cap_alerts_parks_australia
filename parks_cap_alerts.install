@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function parks_cap_alerts_install()
+{
+
+    // Add an entity reference field to the CAP Alert content type.
+    $location_reference_field_name = 'field_location_reference';
+    $close_park_field_name = 'field_close_park';
+    $close_locations_field_name = 'field_location_reference_close';
+    $content_type = 'cap_alert_message';
+
+    // Check if the content type exists.
+    if (!\Drupal::entityTypeManager()->getStorage('node_type')->load($content_type)) {
+        \Drupal::logger('parks_cap_alerts')->warning('The content type ' . $content_type . ' does not exist. The fields ' . $location_reference_field_name . ', ' . $close_park_field_name . ', and ' . $close_locations_field_name . ' were not created in ' . $content_type . '.');
+        return;
+    }
+
+    // Check if the field already exists.
+    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $location_reference_field_name)) {
+        // Create field storage (shared among all bundles).
+        $field_storage = [
+            'field_name' => $location_reference_field_name,
+            'entity_type' => 'node',
+            'type' => 'entity_reference',
+            'settings' => [
+                'target_type' => 'node',
+            ],
+            'cardinality' => -1,
+            'translatable' => TRUE,
+        ];
+        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    }
+    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_park_field_name)) {
+        $field_storage = [
+            'field_name' => $close_park_field_name,
+            'entity_type' => 'node',
+            'type' => 'boolean',
+            'settings' => [
+                'default_value' => 0,
+                0 => 'No',
+                1 => 'Yes, CLOSE THE PARK',
+            ],
+            'cardinality' => 1,
+            'translatable' => TRUE,
+        ];
+        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    }
+    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_locations_field_name)) {
+        $field_storage = [
+            'field_name' => $close_locations_field_name,
+            'entity_type' => 'node',
+            'type' => 'boolean',
+            'settings' => [
+                'default_value' => 0,
+                0 => 'No',
+                1 => 'Yes',
+            ],
+            'cardinality' => 1,
+            'translatable' => TRUE,
+        ];
+        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    }
+
+    // Create field instance for the CAP Alert bundle.
+    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $location_reference_field_name)) {
+        $field = [
+            'field_name' => $location_reference_field_name,
+            'entity_type' => 'node',
+            'bundle' => $content_type,
+            'label' => 'Location Reference',
+            'description' => '<p>Related Locations will show this Alert anywhere they appear.</p>
+            <p>Note that Locations in an affected area on the map are linked to this Alert automatically - no need to add them here!<p>
+            <p>Add Locations here only if a Location is genuinely impacted and:</p>
+            <ul>
+            <li>this Alert doesn\'t have any mapping coordinates, or</li>
+            <li>this Alert DOES have mapping coordinates, but the Location falls outside the affected area.</li>
+            </ul>',
+            'required' => FALSE,
+            'settings' => [
+                'handler' => 'default',
+                'handler_settings' => [
+                    'target_bundles' => ['location' => 'location'],
+                ],
+            ],
+        ];
+        \Drupal\field\Entity\FieldConfig::create($field)->save();
+    }
+    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_park_field_name)) {
+        $field = [
+            'field_name' => $close_park_field_name,
+            'entity_type' => 'node',
+            'bundle' => $content_type,
+            'label' => 'Close the ENTIRE PARK?',
+            'description' => '<p>If YES, ALL park Locations will appear as \'Closed\' and a closure banner will appear on all pages until this Alert expires.</p>',
+            'required' => TRUE,
+            'default_value' => 0,
+            'settings' => [],
+        ];
+        \Drupal\field\Entity\FieldConfig::create($field)->save();
+    }
+    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_locations_field_name)) {
+        $field = [
+            'field_name' => $close_locations_field_name,
+            'entity_type' => 'node',
+            'bundle' => $content_type,
+            'label' => 'Close related Locations?',
+            'description' => '<p>If YES, any Locations referenced by this Alert will appear as \'Closed\' until this Alert expires.</p>.',
+            'required' => TRUE,
+            'default_value' => 0,
+            'settings' => [
+                'handler' => 'default',
+                'handler_settings' => [
+                    'target_bundles' => ['location' => 'location'],
+                ],
+            ],
+        ];
+        \Drupal\field\Entity\FieldConfig::create($field)->save();
+    }
+
+    // Set widget and display settings using the recommended API.
+    $form_display = \Drupal::entityTypeManager()
+        ->getStorage('entity_form_display')
+        ->load('node.' . $content_type . '.default');
+    if ($form_display && method_exists($form_display, 'setComponent')) {
+        $form_display->setComponent($close_locations_field_name, [
+            'type' => 'radio',
+            'weight' => 12,
+            'settings' => [],
+        ]);
+        $form_display->setComponent($close_park_field_name, [
+            'type' => 'radio',
+            'weight' => 13,
+            'settings' => [],
+        ]);
+        $form_display->setComponent($location_reference_field_name, [
+            'type' => 'entity_reference_autocomplete',
+            'weight' => 20,
+            'settings' => [
+                'match_operator' => 'CONTAINS',
+                'size' => 60,
+                'autocomplete_type' => 'tags',
+                'placeholder' => '',
+            ],
+        ]);
+        $form_display->save();
+    }
+
+    $view_display = \Drupal::entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load('node.' . $content_type . '.default');
+    if ($view_display && method_exists($view_display, 'setComponent')) {
+        $view_display->setComponent($close_locations_field_name, [
+            'label' => 'above',
+            'type' => 'boolean',
+            'weight' => 12,
+            'settings' => [
+                'format' => 'yes-no',
+            ],
+        ]);
+        $view_display->setComponent($close_park_field_name, [
+            'label' => 'above',
+            'type' => 'boolean',
+            'weight' => 13,
+            'settings' => [
+                'format' => 'yes-no',
+            ],
+        ]);
+        $view_display->setComponent($location_reference_field_name, [
+            'label' => 'above',
+            'type' => 'entity_reference_label',
+            'weight' => 20,
+        ]);
+        $view_display->save();
+    }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function parks_cap_alerts_uninstall()
+{
+    $location_reference_field_name = 'field_location_reference';
+    $close_park_field_name = 'field_close_park';
+    $close_locations_field_name = 'field_location_reference_close';
+    $content_type = 'cap_alert_message';
+
+    // Remove the field instances from the bundle.
+    if ($field = \Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $location_reference_field_name)) {
+        $field->delete();
+    }
+    if ($field = \Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_park_field_name)) {
+        $field->delete();
+    }
+    if ($field = \Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_locations_field_name)) {
+        $field->delete();
+    }
+
+    // Remove the fields' storage if no other bundles use it.
+    if ($storage = \Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $location_reference_field_name)) {
+        $storage->delete();
+    }
+    if ($storage = \Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_park_field_name)) {
+        $storage->delete();
+    }
+    if ($storage = \Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_locations_field_name)) {
+        $storage->delete();
+    }
+}
