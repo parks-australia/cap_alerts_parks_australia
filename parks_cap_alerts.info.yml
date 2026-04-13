@@ -7,5 +7,6 @@ version: '0.1'
 dependencies:
   - drupal:auto_entitylabel
   - drupal:cap_alerts
+  - drupal:cap_alerts_cap_au_std
   - drupal:cap_au_std_terms_migrations
   - drupal:pathauto

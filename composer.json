@@ -21,7 +21,7 @@
       "type": "package",
       "package": {
         "name": "drupal/cap_alerts_parks_australia",
-        "version": "0.1",
+        "version": "0.2",
         "type": "drupal-module",
         "source": {
           "url": "https://github.com/parks-australia/cap_alerts_parks_australia.git",
@@ -33,6 +33,6 @@
   ],
   "require": {
     "drupal/cap_alerts": "^0.15",
-    "drupal/cap_alerts_cap_au_std": "^0.9"
+    "drupal/cap_alerts_cap_au_std": "^0.10"
   }
 }
