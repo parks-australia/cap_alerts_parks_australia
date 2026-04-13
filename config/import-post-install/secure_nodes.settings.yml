@@ -1,0 +1,15 @@
+allowed_types:
+  - anbg_lh_homepage
+  - app_page
+  - event
+  - kar_content
+  - news_article
+  - page
+  - park
+  - people
+  - place
+  - project
+  - publication
+  - region
+  - tour
+  - wildlife

@@ -1,0 +1,41 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.access_report_text
+    - filter.format.simple_html
+    - node.type.location
+    - taxonomy.vocabulary.common_notices
+    - taxonomy.vocabulary.location_type
+  module:
+    - block_content
+    - field_permissions
+    - file
+    - filter
+    - node
+    - system
+    - taxonomy_access_fix
+    - toolbar
+id: access_report_editor
+label: 'Access Report editor'
+weight: 0
+is_admin: false
+permissions:
+  - 'create field_access_report_body'
+  - 'create location content'
+  - 'delete own files'
+  - 'edit any access_report_text block content'
+  - 'edit any location content'
+  - 'edit field_access_report_body'
+  - 'revert location revisions'
+  - 'select terms in common_notices'
+  - 'select terms in location_type'
+  - 'use text format simple_html'
+  - 'view field_access_report_body'
+  - 'view location revisions'
+  - 'view term names in common_notices'
+  - 'view term names in location_type'
+  - 'view terms in common_notices'
+  - 'view terms in location_type'
+  - 'view vocabulary name of common_notices'
+  - 'view vocabulary name of location_type'
