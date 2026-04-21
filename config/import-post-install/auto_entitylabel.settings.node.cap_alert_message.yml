@@ -1,0 +1,10 @@
+status: 1
+pattern: '[node:created:html_date] - [node:field_site:0:target_id] - [node:field_cap_alert_info:0:entity:field_cap_event_code] - [node:field_cap_alert_info:0:entity:field_cap_headline]'
+escape: false
+preserve_titles: true
+save: false
+chunk: 50
+dependencies:
+  config:
+    - node.type.cap_alert_message
+new_content_behavior: 1
