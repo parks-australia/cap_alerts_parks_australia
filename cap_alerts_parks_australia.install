@@ -3,7 +3,7 @@
 /**
  * Implements hook_install().
  */
-function parks_cap_alerts_install()
+function cap_alerts_parks_australia_install()
 {
 
     // Add an entity reference field to the CAP Alert content type.
@@ -14,7 +14,7 @@ function parks_cap_alerts_install()
 
     // Check if the content type exists.
     if (!\Drupal::entityTypeManager()->getStorage('node_type')->load($content_type)) {
-        \Drupal::logger('parks_cap_alerts')->warning('The content type ' . $content_type . ' does not exist. The fields ' . $location_reference_field_name . ', ' . $close_park_field_name . ', and ' . $close_locations_field_name . ' were not created in ' . $content_type . '.');
+        \Drupal::logger('cap_alerts_parks_australia')->warning('The content type ' . $content_type . ' does not exist. The fields ' . $location_reference_field_name . ', ' . $close_park_field_name . ', and ' . $close_locations_field_name . ' were not created in ' . $content_type . '.');
         return;
     }
 
@@ -180,7 +180,7 @@ function parks_cap_alerts_install()
 /**
  * Implements hook_uninstall().
  */
-function parks_cap_alerts_uninstall()
+function cap_alerts_parks_australia_uninstall()
 {
     $location_reference_field_name = 'field_location_reference';
     $close_park_field_name = 'field_close_park';

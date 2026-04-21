@@ -3,7 +3,7 @@
 /**
  * Implements hook_requirements().
  */
-function parks_cap_alerts_requirements($phase)
+function cap_alerts_parks_australia_requirements($phase)
 {
     $requirements = [];
     if ($phase == 'install') {
@@ -11,8 +11,8 @@ function parks_cap_alerts_requirements($phase)
         $required = ['cap_alerts'];
         foreach ($required as $module) {
             if (!\Drupal::moduleHandler()->moduleExists($module)) {
-                $requirements['parks_cap_alerts_dependencies'] = [
-                    'title' => t('Parks CAP Alerts dependencies'),
+                $requirements['cap_alerts_parks_australia_dependencies'] = [
+                    'title' => t('CAP Alerts Parks Australia dependencies'),
                     'value' => t('Missing required module: @module', ['@module' => $module]),
                     'severity' => REQUIREMENT_ERROR,
                 ];
