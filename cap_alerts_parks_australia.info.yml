@@ -3,7 +3,7 @@ type: module
 description: 'Integrates Parks Australia-specific entities with the CAP Alerts module'
 package: 'CAP Safety Alerts'
 core_version_requirement: ^11
-version: '0.8'
+version: '0.9'
 dependencies:
   - drupal:auto_entitylabel
   - drupal:cap_alerts
