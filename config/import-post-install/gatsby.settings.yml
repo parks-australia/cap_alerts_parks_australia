@@ -34,6 +34,7 @@ preview:
   publication: 0
   project: 0
   location: 0
+  cap_alert: 0
 iframe:
   bird: 0
   mammal: 0
@@ -65,6 +66,7 @@ iframe:
   publication: 0
   project: 0
   location: 0
+  cap_alert: 0
 target:
   bird: window
   mammal: window
@@ -96,3 +98,4 @@ target:
   publication: window
   project: window
   location: window
+  cap_alert: cap_alert
