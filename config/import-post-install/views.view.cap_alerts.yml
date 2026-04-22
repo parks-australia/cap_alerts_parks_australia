@@ -18,11 +18,8 @@ dependencies:
     - system.menu.admin
     - taxonomy.vocabulary.cap_au_std_message_type
     - taxonomy.vocabulary.cap_au_std_scope
-    - taxonomy.vocabulary.cap_au_std_status
     - user.role.administrator
     - user.role.cap_alert_editor
-  content:
-    - 'taxonomy_term:cap_au_std_status:aab88512-762f-44d8-aca0-1b6b77cd3d8f'
   module:
     - datetime
     - gatsby_endpoints
@@ -33,7 +30,7 @@ dependencies:
 id: cap_alerts
 label: Alerts
 module: views
-description: 'Manage CAP safety alerts for all parks'
+description: 'Manage CAP Alerts for all parks'
 tag: ''
 base_table: node_field_data
 base_field: nid
@@ -1384,59 +1381,6 @@ display:
             group_items: {  }
           reduce_duplicates: false
           vid: cap_au_std_scope
-          type: select
-          hierarchy: false
-          limit: true
-          error_message: true
-          save_lineage: false
-          force_deepest: false
-          parent: null
-          level_labels: ''
-          hierarchy_depth: 0
-          required_depth: 0
-          none_label: '- Please select -'
-        field_cap_status_target_id:
-          id: field_cap_status_target_id
-          table: node__field_cap_status
-          field: field_cap_status_target_id
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: taxonomy_index_tid
-          operator: or
-          value:
-            2081: 2081
-          group: 1
-          exposed: true
-          expose:
-            operator_id: field_cap_status_target_id_op
-            label: Status
-            description: ''
-            use_operator: false
-            operator: field_cap_status_target_id_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: field_cap_status_target_id
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            reduce: false
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          reduce_duplicates: false
-          vid: cap_au_std_status
           type: select
           hierarchy: false
           limit: true
