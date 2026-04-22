@@ -16,7 +16,6 @@ build_entity_types:
     entity_type: node
     entity_bundles:
       event: event
-      location: location
       news_article: news_article
       page: page
       people: people
@@ -33,9 +32,11 @@ build_entity_types:
       anbg_lh_topic: 0
       app_page: 0
       cinp_location: 0
+      html_email: 0
       hub_resource_video: 0
       kar_content: 0
       kar_location: 0
+      location: 0
       park: 0
     build_published: 1
     include_entities:
@@ -64,6 +65,7 @@ build_entity_types:
       site_wide_message: site_wide_message
       social_media: social_media
       tile_images_some_pages: tile_images_some_pages
+      access_report_text: 0
       content_block: 0
     include_entities:
       file: file

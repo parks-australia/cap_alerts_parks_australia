@@ -15,9 +15,8 @@ build_entity_types:
   0:
     entity_type: node
     entity_bundles:
+      cap_alert_message: cap_alert_message
       event: event
-      kar_content: kar_content
-      kar_location: kar_location
       location: location
       news_article: news_article
       page: page
@@ -35,7 +34,10 @@ build_entity_types:
       anbg_lh_topic: 0
       app_page: 0
       cinp_location: 0
+      html_email: 0
       hub_resource_video: 0
+      kar_content: 0
+      kar_location: 0
       park: 0
     build_published: 1
     include_entities:
