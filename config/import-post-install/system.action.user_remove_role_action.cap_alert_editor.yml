@@ -6,7 +6,7 @@ dependencies:
   module:
     - user
 id: user_remove_role_action.cap_alert_editor
-label: 'Remove the Safety Alert Editor role from the selected user(s)'
+label: 'Remove the CAP Alert Editor role from the selected user(s)'
 type: user
 plugin: user_remove_role_action
 configuration:
