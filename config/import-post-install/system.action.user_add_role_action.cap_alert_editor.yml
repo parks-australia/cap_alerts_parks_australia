@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.cap_alert_editor
+  module:
+    - user
+id: user_add_role_action.cap_alert_editor
+label: 'Add the Safety Alert Editor role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: cap_alert_editor
