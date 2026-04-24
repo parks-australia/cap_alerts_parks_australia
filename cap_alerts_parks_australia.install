@@ -157,7 +157,7 @@ function cap_alerts_parks_australia_install()
         ->load('node.' . $content_type . '.default');
     if ($form_display && method_exists($form_display, 'setComponent')) {
         $form_display->setComponent($park_reference_field_name, [
-            'type' => 'entity_reference_label',
+            'type' => 'gatsby_endpoints_select',
             'weight' => 50,
             'settings' => [],
         ]);
