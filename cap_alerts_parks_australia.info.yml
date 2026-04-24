@@ -9,3 +9,4 @@ dependencies:
   - drupal:cap_alerts
   - drupal:cap_alerts_cap_au_std
   - drupal:pathauto
+  - drupal:gatsby_endpoints

@@ -22,19 +22,19 @@ function cap_alerts_parks_australia_install()
     }
 
     // Create field storage, unless the field already exists.
-    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $park_reference_field_name)) {
-        $field_storage = [
-            'field_name' => $park_reference_field_name,
-            'entity_type' => 'node',
-            'type' => 'gatsby_endpoint_reference',
-            'settings' => [
-                'target_type' => 'gatsby_endpoint',
-            ],
-            'cardinality' => -1,
-            'translatable' => TRUE,
-        ];
-        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
-    }
+    // if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $park_reference_field_name)) {
+    //     $field_storage = [
+    //         'field_name' => $park_reference_field_name,
+    //         'entity_type' => 'node',
+    //         'type' => 'gatsby_endpoint_reference',
+    //         'settings' => [
+    //             'target_type' => 'gatsby_endpoint',
+    //         ],
+    //         'cardinality' => -1,
+    //         'translatable' => TRUE,
+    //     ];
+    //     \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    // }
     if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $location_reference_field_name)) {
         $field_storage = [
             'field_name' => $location_reference_field_name,
@@ -91,7 +91,7 @@ function cap_alerts_parks_australia_install()
             'settings' => [
                 'handler' => 'default',
                 'handler_settings' => [
-                    'target_bundles' => ['cap_alert_message' => 'cap_alert_message'],
+                    'target_bundles' => ['gatsby_endpoint' => 'gatsby_endpoint'],
                 ],
             ],
         ];
@@ -102,8 +102,8 @@ function cap_alerts_parks_australia_install()
             'field_name' => $location_reference_field_name,
             'entity_type' => 'node',
             'bundle' => $content_type,
-            'label' => 'Location Reference',
-            'description' => '<p>Related Locations will show this Alert anywhere they appear.</p>
+            'label' => 'Related Locations',
+            'description' => '<p>Any related Locations will show this Alert anywhere they appear.</p>
             <p>Add Locations here only if a Location is genuinely impacted and:</p>
             <ul>
             <li>this Alert doesn\'t have any mapping coordinates, or</li>
