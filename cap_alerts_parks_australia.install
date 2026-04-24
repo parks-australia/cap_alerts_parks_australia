@@ -146,7 +146,7 @@ function cap_alerts_parks_australia_install()
     if ($form_display && method_exists($form_display, 'setComponent')) {
         $form_display->setComponent($park_reference_field_name, [
             'type' => 'gatsby_endpoints_select',
-            'weight' => 50,
+            'weight' => 10,
             'settings' => [],
         ]);
         $form_display->setComponent($close_locations_field_name, [
@@ -180,7 +180,7 @@ function cap_alerts_parks_australia_install()
         $view_display->setComponent($park_reference_field_name, [
             'label' => 'above',
             'type' => 'boolean',
-            'weight' => 12,
+            'weight' => 11,
             'settings' => [
                 'format' => 'entity_reference_label',
             ],
@@ -188,7 +188,7 @@ function cap_alerts_parks_australia_install()
         $view_display->setComponent($close_locations_field_name, [
             'label' => 'above',
             'type' => 'boolean',
-            'weight' => 12,
+            'weight' => 15,
             'settings' => [
                 'format' => 'yes-no',
             ],
@@ -196,7 +196,7 @@ function cap_alerts_parks_australia_install()
         $view_display->setComponent($close_park_field_name, [
             'label' => 'above',
             'type' => 'boolean',
-            'weight' => 13,
+            'weight' => 16,
             'settings' => [
                 'format' => 'yes-no',
             ],
