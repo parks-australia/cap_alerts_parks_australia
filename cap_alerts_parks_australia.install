@@ -5,10 +5,20 @@
  */
 function cap_alerts_parks_australia_install()
 {
+    _cap_alerts_parks_australia_provision_fields();
+}
 
-    // Add  Parks-specific fields to the CAP Alert content type. 
-    // * These values are repeated in cap_alerts_parks_australia_uninstall()
-    //   below and must be kept in sync
+/**
+ * Creates/updates the Parks-specific fields on the CAP Alert content type.
+ *
+ * Shared between hook_install() (fresh installs) and the update hook below
+ * (sites where the module is already installed), so both stay in sync.
+ *
+ * * These values are repeated in cap_alerts_parks_australia_uninstall()
+ *   below and must be kept in sync.
+ */
+function _cap_alerts_parks_australia_provision_fields()
+{
     $content_type = 'cap_alert_message';
     $close_park_field_name = 'field_close_park';
     $close_locations_field_name = 'field_location_reference_close';
@@ -21,7 +31,7 @@ function cap_alerts_parks_australia_install()
         return;
     }
 
-    // Create field storage, unless the field already exists. 
+    // Create field storage, unless the field already exists.
     //
     // NOTE: We don't check for 'field_site' here because we assume it's already
     // installed on the Parks Australia Drupal website
@@ -38,39 +48,46 @@ function cap_alerts_parks_australia_install()
         ];
         \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
     }
-    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_park_field_name)) {
-        $field_storage = [
-            'field_name' => $close_park_field_name,
-            'entity_type' => 'node',
-            'type' => 'boolean',
-            'settings' => [
-                'default_value' => 0,
-                0 => 'No',
-                1 => 'Yes, CLOSE THE PARK',
-            ],
-            'cardinality' => 1,
-            'translatable' => TRUE,
-        ];
-        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
-    }
-    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_locations_field_name)) {
-        $field_storage = [
-            'field_name' => $close_locations_field_name,
-            'entity_type' => 'node',
-            'type' => 'boolean',
-            'settings' => [
-                'default_value' => 0,
-                0 => 'No',
-                1 => 'Yes',
-            ],
-            'cardinality' => 1,
-            'translatable' => TRUE,
-        ];
-        \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
-    }
+    // Close-park / close-locations fields remain disabled; they belong to a
+    // separate, not-yet-integrated "park closure" workflow.
+    // if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_park_field_name)) {
+    //     $field_storage = [
+    //         'field_name' => $close_park_field_name,
+    //         'entity_type' => 'node',
+    //         'type' => 'boolean',
+    //         'settings' => [
+    //             'default_value' => 0,
+    //             0 => 'No',
+    //             1 => 'Yes, CLOSE THE PARK',
+    //         ],
+    //         'cardinality' => 1,
+    //         'translatable' => TRUE,
+    //     ];
+    //     \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    // }
+    // if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $close_locations_field_name)) {
+    //     $field_storage = [
+    //         'field_name' => $close_locations_field_name,
+    //         'entity_type' => 'node',
+    //         'type' => 'boolean',
+    //         'settings' => [
+    //             'default_value' => 0,
+    //             0 => 'No',
+    //             1 => 'Yes',
+    //         ],
+    //         'cardinality' => 1,
+    //         'translatable' => TRUE,
+    //     ];
+    //     \Drupal\field\Entity\FieldStorageConfig::create($field_storage)->save();
+    // }
 
-    // Create field instance for the CAP Alert bundle
-    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $park_reference_field_name)) {
+    // Create field instance for the CAP Alert bundle. The Park field is
+    // restricted to website (non-"_app") Gatsby endpoints, since Alerts only
+    // ever apply to the map/website context; a shortcode-normalisation rule
+    // elsewhere strips "_app" when matching, so a single website selection
+    // also covers any future mobile-app consumption.
+    $park_field_config = \Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $park_reference_field_name);
+    if (!$park_field_config) {
         $field = [
             'field_name' => $park_reference_field_name,
             'entity_type' => 'node',
@@ -79,20 +96,26 @@ function cap_alerts_parks_australia_install()
             'description' => 'Which park does this Alert relate to? Ctrl+Click to select multiple options',
             'required' => TRUE,
             'settings' => [
-                'handler' => 'default',
+                'handler' => 'cap_alerts_parks_australia_gatsby_endpoint_website',
                 'handler_settings' => [],
             ],
         ];
         \Drupal\field\Entity\FieldConfig::create($field)->save();
     }
+    elseif ($park_field_config->getSetting('handler') !== 'cap_alerts_parks_australia_gatsby_endpoint_website') {
+        $park_field_config->setSetting('handler', 'cap_alerts_parks_australia_gatsby_endpoint_website');
+        $park_field_config->setSetting('handler_settings', []);
+        $park_field_config->save();
+    }
+
     if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $location_reference_field_name)) {
         $field = [
             'field_name' => $location_reference_field_name,
             'entity_type' => 'node',
             'bundle' => $content_type,
             'label' => 'Related Locations',
-            'description' => '<p>Any related Locations will show this Alert anywhere they appear.</p>
-            <p>Add Locations here only if a Location is genuinely impacted and:</p>
+            'description' => '<p>Locations inside this Alert\'s polygon/circle area(s) are related automatically. Any related Locations will show this Alert anywhere they appear.</p>
+            <p>Add Locations here manually only if a Location is genuinely impacted and:</p>
             <ul>
             <li>this Alert doesn\'t have any mapping coordinates, or</li>
             <li>this Alert DOES have mapping coordinates, but the Location falls outside the affected area.</li>
@@ -107,37 +130,37 @@ function cap_alerts_parks_australia_install()
         ];
         \Drupal\field\Entity\FieldConfig::create($field)->save();
     }
-    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_park_field_name)) {
-        $field = [
-            'field_name' => $close_park_field_name,
-            'entity_type' => 'node',
-            'bundle' => $content_type,
-            'label' => 'Close the ENTIRE PARK?',
-            'description' => '<p>If YES, ALL park Locations will appear as \'Closed\' and a closure banner will appear on all pages until this Alert expires.</p>',
-            'required' => TRUE,
-            'default_value' => 0,
-            'settings' => [],
-        ];
-        \Drupal\field\Entity\FieldConfig::create($field)->save();
-    }
-    if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_locations_field_name)) {
-        $field = [
-            'field_name' => $close_locations_field_name,
-            'entity_type' => 'node',
-            'bundle' => $content_type,
-            'label' => 'Close related Locations?',
-            'description' => '<p>If YES, any Locations referenced by this Alert will appear as \'Closed\' until this Alert expires.</p>',
-            'required' => TRUE,
-            'default_value' => 0,
-            'settings' => [
-                'handler' => 'default',
-                'handler_settings' => [
-                    'target_bundles' => ['location' => 'location'],
-                ],
-            ],
-        ];
-        \Drupal\field\Entity\FieldConfig::create($field)->save();
-    }
+    // if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_park_field_name)) {
+    //     $field = [
+    //         'field_name' => $close_park_field_name,
+    //         'entity_type' => 'node',
+    //         'bundle' => $content_type,
+    //         'label' => 'Close the ENTIRE PARK?',
+    //         'description' => '<p>If YES, ALL park Locations will appear as \'Closed\' and a closure banner will appear on all pages until this Alert expires.</p>',
+    //         'required' => TRUE,
+    //         'default_value' => 0,
+    //         'settings' => [],
+    //     ];
+    //     \Drupal\field\Entity\FieldConfig::create($field)->save();
+    // }
+    // if (!\Drupal::entityTypeManager()->getStorage('field_config')->load('node.' . $content_type . '.' . $close_locations_field_name)) {
+    //     $field = [
+    //         'field_name' => $close_locations_field_name,
+    //         'entity_type' => 'node',
+    //         'bundle' => $content_type,
+    //         'label' => 'Close related Locations?',
+    //         'description' => '<p>If YES, any Locations referenced by this Alert will appear as \'Closed\' until this Alert expires.</p>',
+    //         'required' => TRUE,
+    //         'default_value' => 0,
+    //         'settings' => [
+    //             'handler' => 'default',
+    //             'handler_settings' => [
+    //                 'target_bundles' => ['location' => 'location'],
+    //             ],
+    //         ],
+    //     ];
+    //     \Drupal\field\Entity\FieldConfig::create($field)->save();
+    // }
 
     // Set field widget settings
     $form_display = \Drupal::entityTypeManager()
@@ -147,16 +170,6 @@ function cap_alerts_parks_australia_install()
         $form_display->setComponent($park_reference_field_name, [
             'type' => 'gatsby_endpoints_select',
             'weight' => 10,
-            'settings' => [],
-        ]);
-        $form_display->setComponent($close_locations_field_name, [
-            'type' => 'options_buttons',
-            'weight' => 12,
-            'settings' => [],
-        ]);
-        $form_display->setComponent($close_park_field_name, [
-            'type' => 'options_buttons',
-            'weight' => 13,
             'settings' => [],
         ]);
         $form_display->setComponent($location_reference_field_name, [
@@ -169,6 +182,16 @@ function cap_alerts_parks_australia_install()
                 'placeholder' => '',
             ],
         ]);
+        // $form_display->setComponent($close_locations_field_name, [
+        //     'type' => 'options_buttons',
+        //     'weight' => 12,
+        //     'settings' => [],
+        // ]);
+        // $form_display->setComponent($close_park_field_name, [
+        //     'type' => 'options_buttons',
+        //     'weight' => 13,
+        //     'settings' => [],
+        // ]);
         $form_display->save();
     }
 
@@ -185,29 +208,40 @@ function cap_alerts_parks_australia_install()
                 'format' => 'entity_reference_label',
             ],
         ]);
-        $view_display->setComponent($close_locations_field_name, [
-            'label' => 'above',
-            'type' => 'boolean',
-            'weight' => 15,
-            'settings' => [
-                'format' => 'yes-no',
-            ],
-        ]);
-        $view_display->setComponent($close_park_field_name, [
-            'label' => 'above',
-            'type' => 'boolean',
-            'weight' => 16,
-            'settings' => [
-                'format' => 'yes-no',
-            ],
-        ]);
         $view_display->setComponent($location_reference_field_name, [
             'label' => 'above',
             'type' => 'entity_reference_label',
             'weight' => 20,
         ]);
+        // $view_display->setComponent($close_locations_field_name, [
+        //     'label' => 'above',
+        //     'type' => 'boolean',
+        //     'weight' => 15,
+        //     'settings' => [
+        //         'format' => 'yes-no',
+        //     ],
+        // ]);
+        // $view_display->setComponent($close_park_field_name, [
+        //     'label' => 'above',
+        //     'type' => 'boolean',
+        //     'weight' => 16,
+        //     'settings' => [
+        //         'format' => 'yes-no',
+        //     ],
+        // ]);
         $view_display->save();
     }
+}
+
+/**
+ * Re-enables field_location_reference and restricts the Park field.
+ *
+ * Applies the same field provisioning as hook_install() to sites where this
+ * module is already installed (hook_install() only runs on fresh installs).
+ */
+function cap_alerts_parks_australia_update_10001()
+{
+    _cap_alerts_parks_australia_provision_fields();
 }
 
 /**

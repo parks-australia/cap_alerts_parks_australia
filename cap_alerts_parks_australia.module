@@ -21,3 +21,20 @@ function cap_alerts_parks_australia_requirements($phase)
     }
     return $requirements;
 }
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for node.
+ *
+ * Auto-relates CAP Alert nodes to any Location nodes whose coordinates fall
+ * inside the Alert's polygon/circle area(s), scoped to the same park
+ * (field_site). This is additive only; it never removes manually-added
+ * Locations from field_location_reference.
+ */
+function cap_alerts_parks_australia_node_presave(\Drupal\node\NodeInterface $node)
+{
+    if ($node->bundle() !== 'cap_alert_message') {
+        return;
+    }
+    \Drupal::service(\Drupal\cap_alerts_parks_australia\Service\CapAlertLocationRelator::class)->relate($node);
+}
+

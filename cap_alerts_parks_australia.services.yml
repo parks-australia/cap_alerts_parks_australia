@@ -1,3 +1,10 @@
 services:
   Drupal\cap_alerts\Service\CapAlertsHelper:
     alias: 'cap_alerts.cap_alerts_helper'
+  logger.channel.cap_alerts_parks_australia:
+    parent: logger.channel_base
+    arguments: ['cap_alerts_parks_australia']
+  Drupal\cap_alerts_parks_australia\Service\CapAlertLocationRelator:
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.channel.cap_alerts_parks_australia'

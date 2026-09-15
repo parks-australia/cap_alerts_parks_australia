@@ -4,12 +4,11 @@
   "type": "drupal-module",
   "keywords": [
     "Australian Warning System",
-    "CAP-AU-STD",
     "CAP",
     "Common Alerting Protocol",
     "Drupal",
     "Emergency alerts",
-    "Emergency warning sytem",
+    "Emergency warning system",
     "Incident response",
     "Parks Australia",
     "Safety alerts"
@@ -21,7 +20,7 @@
       "type": "package",
       "package": {
         "name": "drupal/cap_alerts_parks_australia",
-        "version": "0.13",
+        "version": "0.15",
         "type": "drupal-module",
         "source": {
           "url": "https://github.com/parks-australia/cap_alerts_parks_australia.git",
@@ -32,6 +31,6 @@
     }
   ],
   "require": {
-    "drupal/cap_alerts_cap_au_std": "*"
+    "drupal/cap_alerts": "^2.1"
   }
 }

@@ -3,10 +3,10 @@ type: module
 description: 'Integrates Parks Australia-specific entities with the CAP Alerts module'
 package: 'CAP Safety Alerts'
 core_version_requirement: ^11
-version: '0.12'
+version: '0.15'
 dependencies:
   - drupal:auto_entitylabel
   - drupal:cap_alerts
-  - drupal:cap_alerts_cap_au_std
+  - drupal:geofield
   - drupal:pathauto
   - drupal:gatsby_endpoints
