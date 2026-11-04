@@ -166,6 +166,7 @@ final class CapAlertLocationRelator {
 
       if ($changed) {
         $parameterField->setValue($retainedItems);
+        $info->setNeedsSave(TRUE);
       }
     }
   }
