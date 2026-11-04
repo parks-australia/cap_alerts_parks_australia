@@ -6,6 +6,7 @@ namespace Drupal\cap_alerts_parks_australia\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
+use Drupal\paragraphs\Entity\Paragraph;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -35,6 +36,11 @@ final class CapAlertLocationRelator {
    */
   private const LOCATION_BUNDLE = 'location';
 
+  /**
+   * CAP parameter name used to expose related Location UUIDs.
+   */
+  private const LOCATION_UUID_PARAMETER = 'ParksAustraliaLocationUUID';
+
   public function __construct(
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly LoggerInterface $logger,
@@ -52,45 +58,115 @@ final class CapAlertLocationRelator {
     }
 
     $parkIds = $this->getReferencedIds($alert, 'field_site');
-    if (!$parkIds) {
-      return;
-    }
-
-    $areaGeometries = $this->getAlertAreaGeometries($alert);
-    if (!$areaGeometries) {
-      return;
-    }
-
-    $matchedLocationIds = [];
-    foreach ($this->getLocationsForParks($parkIds) as $location) {
-      $point = $this->getLocationPoint($location);
-      if ($point === NULL) {
-        continue;
-      }
-      foreach ($areaGeometries as $geometry) {
-        try {
-          if ($geometry->pointInPolygon($point)) {
-            $matchedLocationIds[] = (int) $location->id();
-            break;
+    if ($parkIds) {
+      $areaGeometries = $this->getAlertAreaGeometries($alert);
+      if ($areaGeometries) {
+        $matchedLocationIds = [];
+        foreach ($this->getLocationsForParks($parkIds) as $location) {
+          $point = $this->getLocationPoint($location);
+          if (!$point) {
+            continue;
+          }
+          foreach ($areaGeometries as $geometry) {
+            try {
+              if ($geometry->pointInPolygon($point)) {
+                $matchedLocationIds[] = (int) $location->id();
+                break;
+              }
+            }
+            catch (\Throwable $e) {
+              $this->logger->warning('CAP Alert @id: geometry containment check failed: @message', [
+                '@id' => $alert->id(),
+                '@message' => $e->getMessage(),
+              ]);
+            }
           }
         }
-        catch (\Throwable $e) {
-          $this->logger->warning('CAP Alert @id: geometry containment check failed: @message', [
-            '@id' => $alert->id(),
-            '@message' => $e->getMessage(),
-          ]);
+
+        if ($matchedLocationIds) {
+          $existingIds = array_map('intval', $this->getReferencedIds($alert, 'field_location_reference'));
+          $mergedIds = array_values(array_unique(array_merge($existingIds, $matchedLocationIds)));
+          if ($mergedIds !== $existingIds) {
+            $alert->set('field_location_reference', $mergedIds);
+          }
         }
       }
     }
 
-    if (!$matchedLocationIds) {
+    $this->syncLocationUuidParameters($alert);
+  }
+
+  /**
+   * Synchronizes generated CAP parameters from all referenced Locations.
+   */
+  private function syncLocationUuidParameters(NodeInterface $alert): void {
+    if (!$alert->hasField('field_cap_alert_info')) {
       return;
     }
 
-    $existingIds = array_map('intval', $this->getReferencedIds($alert, 'field_location_reference'));
-    $mergedIds = array_values(array_unique(array_merge($existingIds, $matchedLocationIds)));
-    if ($mergedIds !== $existingIds) {
-      $alert->set('field_location_reference', $mergedIds);
+    $locationUuids = [];
+    /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $locationReferenceField */
+    $locationReferenceField = $alert->get('field_location_reference');
+    foreach ($locationReferenceField->referencedEntities() as $location) {
+      if ($location instanceof NodeInterface && $location->bundle() === self::LOCATION_BUNDLE) {
+        $uuid = $location->uuid();
+        if ($uuid !== '') {
+          $locationUuids[$uuid] = $uuid;
+        }
+      }
+    }
+    $expectedUuids = array_fill_keys(array_values($locationUuids), TRUE);
+
+    /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $infoField */
+    $infoField = $alert->get('field_cap_alert_info');
+    foreach ($infoField->referencedEntities() as $info) {
+      if (!($info instanceof Paragraph) || !$info->hasField('field_cap_parameter')) {
+        continue;
+      }
+
+      $parameterField = $info->get('field_cap_parameter');
+      $retainedItems = [];
+      $retainedUuids = [];
+      $changed = FALSE;
+      foreach ($parameterField as $item) {
+        $parameter = $item->entity;
+        if (!$parameter || $parameter->bundle() !== 'cap_parameter_group'
+          || !$parameter->hasField('field_cap_parameter_name')
+          || $parameter->get('field_cap_parameter_name')->value !== self::LOCATION_UUID_PARAMETER) {
+          $retainedItems[] = $item->getValue();
+          continue;
+        }
+
+        $uuid = $parameter->hasField('field_cap_parameter_value')
+          ? (string) $parameter->get('field_cap_parameter_value')->value
+          : '';
+        if ($uuid === '' || !isset($expectedUuids[$uuid]) || isset($retainedUuids[$uuid])) {
+          $changed = TRUE;
+          continue;
+        }
+
+        $retainedUuids[$uuid] = TRUE;
+        $retainedItems[] = $item->getValue();
+      }
+
+      foreach ($expectedUuids as $uuid => $_) {
+        if (isset($retainedUuids[$uuid])) {
+          continue;
+        }
+
+        $parameter = Paragraph::create([
+          'type' => 'cap_parameter_group',
+          'field_cap_parameter_name' => [['value' => self::LOCATION_UUID_PARAMETER]],
+          'field_cap_parameter_value' => [['value' => $uuid]],
+        ]);
+        $parameter->setParentEntity($info, 'field_cap_parameter');
+        $retainedItems[] = ['entity' => $parameter];
+        $changed = TRUE;
+      }
+
+      if ($changed) {
+        $parameterField->setValue($retainedItems);
+      }
     }
   }
 
