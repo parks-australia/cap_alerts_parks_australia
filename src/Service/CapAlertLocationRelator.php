@@ -104,6 +104,13 @@ final class CapAlertLocationRelator {
       return;
     }
 
+    /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $infoField */
+    $infoField = $alert->get('field_cap_alert_info');
+    $infoParagraphs = $infoField->referencedEntities();
+    if (!$infoParagraphs) {
+      return;
+    }
+
     $locationUuids = [];
     /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $locationReferenceField */
     $locationReferenceField = $alert->get('field_location_reference');
@@ -117,9 +124,7 @@ final class CapAlertLocationRelator {
     }
     $expectedUuids = array_fill_keys(array_values($locationUuids), TRUE);
 
-    /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $infoField */
-    $infoField = $alert->get('field_cap_alert_info');
-    foreach ($infoField->referencedEntities() as $info) {
+    foreach ($infoParagraphs as $info) {
       if (!($info instanceof Paragraph) || !$info->hasField('field_cap_parameter')) {
         continue;
       }
