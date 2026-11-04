@@ -164,6 +164,7 @@ final class CapAlertLocationRelator {
           'field_cap_parameter_name' => [['value' => self::LOCATION_UUID_PARAMETER]],
           'field_cap_parameter_value' => [['value' => $uuid]],
         ]);
+        $parameter->setNeedsSave(TRUE);
         $parameter->setParentEntity($info, 'field_cap_parameter');
         $retainedItems[] = ['entity' => $parameter];
         $changed = TRUE;

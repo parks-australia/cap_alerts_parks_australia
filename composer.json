@@ -20,7 +20,7 @@
       "type": "package",
       "package": {
         "name": "drupal/cap_alerts_parks_australia",
-        "version": "0.15",
+        "version": "1.0.0",
         "type": "drupal-module",
         "source": {
           "url": "https://github.com/parks-australia/cap_alerts_parks_australia.git",
